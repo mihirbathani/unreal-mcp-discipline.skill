@@ -24,30 +24,26 @@ reference files are server-agnostic.
 
 ## Quick start
 
-Claude Code, one command:
+In Claude Code:
 
-```bash
-/plugin marketplace add mihirbathani/unreal-mcp-discipline.skill
 ```
-
-then:
-
-```bash
+/plugin marketplace add mihirbathani/unreal-mcp-discipline.skill
 /plugin install unreal-mcp-discipline@unreal-mcp-discipline
 ```
 
-Restart Claude Code. That's it — there is nothing to invoke, the skill loads itself when a
-task mentions Unreal.
+Restart Claude Code. There is nothing to invoke after that; the skill loads itself when a task
+mentions Unreal.
 
-Other install routes (plain skill folder, project-level, claude.ai / desktop upload) are in
-**[INSTALL.md](INSTALL.md)**, written step by step.
+The other install routes are in [INSTALL.md](INSTALL.md), written step by step: a plain skill
+folder, a project-level copy that travels with your Unreal project, and a zip upload for
+claude.ai and the desktop app.
 
 ## Documentation
 
 | File | What's in it |
 | --- | --- |
-| **[INSTALL.md](INSTALL.md)** | Every install route, step by step, plus how to verify it loaded |
-| **[USAGE.md](USAGE.md)** | How to use it day to day, example prompts, what output to expect |
+| [INSTALL.md](INSTALL.md) | Every install route, step by step, plus how to check it loaded |
+| [USAGE.md](USAGE.md) | What to type, what to expect back, how to clean up an existing graph |
 | [SKILL.md](SKILL.md) | The skill itself: the loop and the node budget |
 | [references/node-reduction.md](references/node-reduction.md) | Substitution catalogue: Branch ladders to Switch, cast chains to interfaces, copy-paste to functions, Tick polling to dispatchers |
 | [references/documentation.md](references/documentation.md) | Comment and ledger format |
@@ -71,12 +67,12 @@ anything.
 
 ## Requirements
 
-- Unreal Engine 5.8 with the **ModelContextProtocol** plugin enabled, or a community Unreal
-  MCP server (edit the tool names in `references/mcp-operations.md` if so).
-- Claude Code, the Claude desktop app, or claude.ai with Skills enabled.
+Unreal Engine 5.8 with the ModelContextProtocol plugin enabled, or a community Unreal MCP
+server. If you use one of those, edit the tool names in `references/mcp-operations.md` to
+match it. On the Claude side: Claude Code, the desktop app, or claude.ai with Skills enabled.
 
-The skill is plain Markdown. It has no dependencies, runs no code, and does not talk to the
-network itself — your MCP server does that.
+The skill is plain Markdown. It has no dependencies and runs no code. Your MCP server is what
+talks to the editor.
 
 ## Status
 
@@ -85,4 +81,4 @@ before/afters are welcome as issues.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
