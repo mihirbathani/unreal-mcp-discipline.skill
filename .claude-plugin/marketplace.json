@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace-manifest.json",
+  "name": "unreal-mcp-discipline",
+  "owner": {
+    "name": "mihirbathani",
+    "url": "https://github.com/mihirbathani"
+  },
+  "description": "Install unreal-mcp-discipline as a Claude plugin.",
+  "plugins": [
+    {
+      "name": "unreal-mcp-discipline",
+      "source": "./",
+      "description": "Build small, documented, reviewable Blueprint graphs when driving Unreal Editor over MCP.",
+      "license": "MIT",
+      "keywords": ["unreal-engine", "blueprints", "mcp"]
+    }
+  ]
+}
