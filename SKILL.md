@@ -20,6 +20,34 @@ This loads once and applies for the rest of the session. It does not need re-inv
 message, and the rules do not need restating in chat. Follow them quietly. The user sees the
 result in the plan, the graph, and the closing report, not in a recital of the policy.
 
+## Capability check, before anything else
+
+Never start a task assuming it is possible. Every request sorts into one of three routes, and
+the sort happens before the plan, not after a failed call:
+
+1. **MCP can do it.** Confirmed by `describe_toolset` on this build, not by memory and not by
+   the fact that a similar tool existed somewhere else. Proceed.
+2. **MCP cannot, the user can.** Say so at the start, not at the end. Give them the exact
+   text or the exact steps. Comment boxes are the standing example. A one-line "this part you
+   will have to do by hand" up front is worth more than a finished-looking graph with a silent
+   gap in it.
+3. **MCP cannot, computer use can.** Driving the editor UI by screenshot and click covers
+   things with no tool behind them. It is slow, it breaks when the layout moves, and it can
+   click the wrong thing. Offer it, say plainly that it is the slow and fragile path, and let
+   the user choose. Never switch to it silently mid-task.
+
+"I cannot do that part" is a complete and acceptable answer. Guessing, and handing over a
+half-built graph, is not.
+
+### Known limits
+
+- **Comment boxes cannot be created.** No toolset places a comment node, and Blueprint graph
+  editing is barely exposed to Python, so there is no scripting fallback. Route 2 or 3.
+- **Auto-arrange may not exist.** Set node positions explicitly as you create them.
+- **Coverage differs per build.** The plugin is experimental in 5.8 and Epic has said APIs and
+  data formats may change. Tool counts quoted by third parties say nothing about this install.
+- **A successful call is not a correct result.** It means the editor accepted the mutation.
+
 ## The loop
 
 **1. Read before writing.** No node is created before the current state is known.
@@ -94,8 +122,12 @@ That removes the usual home for documentation, so it goes in four other places:
   Description is the hover tooltip everywhere that function is called. A variable Category is
   what makes a 40-variable Blueprint navigable. Check `describe_toolset` before promising
   either, and say in the closing report which ones could not be set.
-- **The ledger**, a dated entry in the project's agent notes: asset path, what changed, why,
-  what was reused, and what is still open. This is the part that survives the session.
+- **Two files in the project, `Content/Docs/`.** `agent-log.md` takes a dated entry for every
+  session that changed something: asset paths, what changed, why, what was reused, what is
+  still open. `blueprint-map.md` is the standing answer to "what is in this project" - one
+  entry per Blueprint that matters, saying what it does, what fires it, and what it talks to.
+  Update the map entry for anything you touch, and add one if it is missing. If the project
+  already has an equivalent convention, follow that instead of adding a second system.
 - **Handoff comment text.** Write the graph header and block comments as plain text in the
   closing report, ready to paste. Thirty seconds of the user's time in the editor beats an
   undocumented graph, and they can decline.
@@ -115,6 +147,17 @@ Push back instead of building:
 
 ## Operating rules
 
+- **Back up before the first write, automatically, without asking.** Copy the asset's
+  `.uasset` to `Saved/AgentBackups/<YYYY-MM-DD-HHMM>/`, keeping its path under Content, before
+  the first mutation of that asset this session. `Saved/` sits outside the content tree, so
+  the copies never show in the Content Browser, never cook into a build, and are already
+  ignored by a standard Unreal `.gitignore`. Do not ask permission and do not skip it to save
+  a call. It is what makes every other rule here recoverable.
+- **Record the commit hash too, when the project is in git.** The disk copy restores one
+  asset. The hash in the ledger tells the user what the whole project looked like beforehand.
+  No git means the disk copy still happens; it is a bonus, not a precondition.
+- **Name the backup folder in the closing report**, once. A backup nobody can find is not a
+  backup.
 - **Serial only.** Tool calls execute on the game thread. Parallel calls into the editor
   deadlock it. One call at a time, always.
 - **Save before and after** any bulk change.
@@ -144,8 +187,9 @@ Graphs:           <graph name> - <N> nodes, <M> functions extracted
 Reused:           <existing functions/interfaces called instead of rebuilt>
 Compile:          clean | <errors and what was done>
 Docs:             descriptions set | <what the toolset refused> | ledger at <path>
-Orphans removed:  <N>
+Orphans removed:  <N>          (omit this line when none were found)
 Not built:        <things suggested but deliberately left out>
+Backup:           Saved/AgentBackups/<folder> | pre-session commit <hash>
 ```
 
 `Not built` is not padding. It is how the next person knows a gap was a decision rather than

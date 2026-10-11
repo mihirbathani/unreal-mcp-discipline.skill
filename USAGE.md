@@ -19,21 +19,28 @@ trigger it. To force it, say "use unreal-mcp-discipline for this".
 
 ## 2. What changes
 
-Without the skill, an agent starts creating nodes immediately. With it, four things happen
+Without the skill, an agent starts creating nodes immediately. With it, five things happen
 first.
 
-1. It reads the target graph, the Blueprint's variables and functions, its parent class, and
+1. It checks whether MCP can do the job at all before planning around it, and tells you up
+   front which parts you will have to do by hand. Comment boxes are the standing example.
+2. It copies the `.uasset` of anything it is about to change into `Saved/AgentBackups/` with a
+   timestamp, without asking. If the project is in git it notes the commit hash too. Nothing
+   it does is unrecoverable.
+3. It reads the target graph, the Blueprint's variables and functions, its parent class, and
    any existing Blueprint Function Library covering the same area. Most "write a new function"
    requests turn out to be "call the one that already exists".
-2. It plans in text and counts. You get the node plan in chat before a single write call:
+4. It plans in text and counts. You get the node plan in chat before a single write call:
    entry point, blocks, estimated node count, and which existing functions get reused. Over
    roughly 30 nodes it splits the plan into functions on paper, which costs a paragraph
    instead of twenty tool calls.
-3. It batches. One script execution per logical unit, not fifty add-node round trips.
+5. It batches. One script execution per logical unit, wrapped in a single undo transaction,
+   so one Ctrl+Z reverses the whole thing.
 4. It documents where MCP can. Names first, since they are the only thing that stays attached
-   to the graph, then asset Descriptions and Categories if the toolset exposes them, then a
-   dated ledger entry in your repo. MCP cannot place comment boxes in a graph, so the header
-   and block comment text comes back in the report for you to paste, or ignore.
+   to the graph, then asset Descriptions and Categories if the toolset exposes them, then two
+   files in `Content/Docs/`: `agent-log.md` for what changed and why, `blueprint-map.md` for
+   what each Blueprint is and what fires it. MCP cannot place comment boxes in a graph, so the
+   header and block comment text comes back in the report for you to paste, or ignore.
 
 ## 3. Read the plan before saying go
 

@@ -9,17 +9,21 @@ logic, the same subgraph pasted four times, no comments, and no record of what c
 
 This skill sets rules the agent follows before it touches the editor:
 
+- Check whether MCP can actually do the task before planning around it, and say up front
+  which parts you will have to do by hand.
+- Back up every asset it is about to touch, automatically, before the first write.
 - Read the graph and the project's existing function libraries before creating any node.
 - State the node plan and a count estimate first.
 - Extract to a function on the third repeat of a block.
 - Stop and refactor above roughly 30 nodes in one graph.
 - Delete anything left disconnected.
-- Document where MCP actually can: names, asset descriptions, and a dated entry in the repo
-  saying what changed, why, and what is still open. MCP cannot place comment boxes in a graph,
-  so the skill hands you that text to paste instead of pretending the graph is commented.
+- Document where MCP actually can: names, asset descriptions, a dated log of changes, and a
+  running map of what each Blueprint is for. MCP cannot place comment boxes in a graph, so the
+  skill hands you that text to paste instead of pretending the graph is commented.
 
-Built for the official Unreal MCP in UE 5.8 (ModelContextProtocol plugin, port 8000, the
-`list_toolsets` / `describe_toolset` / `call_tool` meta-tools). If you run one of the
+Built for the official Unreal MCP in UE 5.8 (the ModelContextProtocol, ToolsetRegistry and
+AllToolsets plugins, port 8000, the `list_toolsets` / `describe_toolset` / `call_tool`
+meta-tools). If you run one of the
 community MCP servers, edit the tool names in `references/mcp-operations.md`. The other two
 reference files are server-agnostic.
 

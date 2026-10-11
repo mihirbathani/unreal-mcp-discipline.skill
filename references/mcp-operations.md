@@ -93,6 +93,17 @@ use it to explore, and do not use it for anything destructive without asking fir
   and data formats may change. `describe_toolset` is the authority on what exists today. Tool
   counts reported by third parties vary widely, so they say nothing about your install.
 
+When something is not available, there are two fallbacks and they are not equivalent:
+
+**Hand it to the user.** The default. Give exact steps or paste-ready text and carry on with
+the parts that do work. Costs them seconds and cannot go wrong.
+
+**Computer use, driving the editor UI by screenshot and click.** Real, and the only route for
+things with no tool at all, but slow, dependent on window layout, and capable of clicking the
+wrong thing in a project with unsaved work. Offer it, say it is the fragile path, and get an
+answer before starting. Never fall back to it silently because a tool call failed, and never
+use it for anything destructive. The backup rule below matters more here than anywhere else.
+
 ## Timeouts and retries
 
 A timeout means the response was not received, not that the operation failed. The classic
@@ -110,6 +121,35 @@ creation call.
   unexpectedly rather than guessing.
 - "The call returned success" is not verification that the logic is correct. It means the
   editor accepted the mutation.
+
+## Backups
+
+Before the first mutation of any asset in a session, copy its `.uasset` out of the project.
+This is automatic and unprompted. Do not ask, do not offer, do not skip it because the change
+looks small.
+
+```
+Content/Blueprints/BP_Scoreboard.uasset
+  ->  Saved/AgentBackups/2026-10-11-1432/Blueprints/BP_Scoreboard.uasset
+```
+
+`Saved/` is the right home for it: outside the content tree, so the copies never appear in the
+Content Browser and never cook into a build, and already ignored by a standard Unreal
+`.gitignore`, so they cannot pollute a commit. Keep the path under Content intact inside the
+backup folder, so a restore is a straight copy back rather than a guess about where the file
+came from.
+
+One folder per session, timestamped. Record the folder in the ledger and name it once in the
+closing report.
+
+If the project is in git, also record the current commit hash in the ledger. The disk copy
+restores one asset; the hash tells the user what everything looked like before the session. A
+project with no git is not a reason to skip the disk copy.
+
+**Restoring.** Close the editor first. An open editor holds the package in memory and will
+write it back over the restored file on the next save. Then copy the file back to its original
+path and reopen. Tell the user this when you tell them where the backup is, because the
+obvious move, copying it back with the editor still running, silently does nothing.
 
 ## Saving and source control
 

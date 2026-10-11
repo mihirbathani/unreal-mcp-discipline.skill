@@ -79,12 +79,12 @@ reader nothing they cannot see, and `Main logic` tells them less.
 The user may not paste any of it. That is fine. It costs a few lines to offer and the ledger
 still holds the same information.
 
-## 4. The agent ledger
+## 4. Content/Docs/agent-log.md
 
-The part that survives the session, and now the primary record, since the graph itself cannot
-carry comments. Append to the project's agent notes file. Check for `CLAUDE.md`, `AGENTS.md`,
-or a `Docs/` convention first and follow it; only create `Docs/Agents/blueprint-log.md` if
-nothing exists. Ask before creating a new file in a repo you did not set up.
+The running record of what agents changed, and the part that survives the session. One dated
+entry per session that changed something. Create the file if it is missing. If the project
+already keeps this somewhere else, a `CLAUDE.md`, an `AGENTS.md`, an existing `Docs/`
+convention, append there instead of starting a competing file.
 
 ```markdown
 ## 2026-10-11 - Scoreboard overlay scoring path
@@ -92,6 +92,9 @@ nothing exists. Ask before creating a new file in a repo you did not set up.
 **Assets**
 - /Game/Blueprints/BP_Scoreboard (modified)
 - /Game/Blueprints/Lib/BPFL_ScoreMath (created)
+
+**Backup**
+Saved/AgentBackups/2026-10-11-1432/ - pre-session commit a3f91c2
 
 **What changed**
 Moved score clamping out of three copies in BP_Scoreboard into BPFL_ScoreMath::ClampDelta.
@@ -118,12 +121,61 @@ Compile clean. PIE: scored during halftime, score correctly unchanged.
 `Open / not done` is what makes the next session cheap. Without it the next agent re-derives
 the same open questions, or worse, silently answers one wrong.
 
-## 5. What not to write
+## 5. Content/Docs/blueprint-map.md
+
+The log says what changed. The map says what exists. It is the file a new person, or a new
+agent session, reads first to find out what the project is made of without opening fifty
+assets.
+
+Update the entry for any Blueprint touched this session. Add an entry if there is none. Do
+not try to document every asset in the project; a map of everything is a map of nothing. An
+entry earns its place if someone could break something by not knowing about it.
+
+```markdown
+# Blueprint map
+
+Last updated: 2026-10-11
+
+## Systems
+
+- **Match flow** - GM_Match drives state, BP_Scoreboard and WBP_Overlay react to it.
+- **Scoring** - BPFL_ScoreMath holds the rules, nothing else is allowed to clamp scores.
+
+## /Game/Blueprints/BP_Scoreboard
+
+Type      : Actor
+Purpose   : Holds live score state and pushes it to the overlay widget.
+Entry     : OnScoreChanged dispatcher from GM_Match. Not on Tick.
+Reads     : MatchState (enum), CurrentScore (struct)
+Writes    : CurrentScore, fires OnScoreChanged
+Functions : UpdateScore (24 nodes), ApplyPenalty (9 nodes)
+Talks to  : GM_Match (binds to its dispatcher), WBP_Overlay (owns the widget)
+Gotcha    : Ignores scoring events while MatchState is Halftime. Deliberate.
+Risk      : Sole writer of CurrentScore. Anything else writing it is a bug.
+
+## /Game/Blueprints/Lib/BPFL_ScoreMath
+
+Type      : Blueprint Function Library (static)
+Purpose   : Scoring arithmetic shared by the scoreboard and the match rules.
+Entry     : Called, never fired.
+Functions : ClampDelta (pure, 6 nodes)
+Talks to  : Nothing. No self reference, no world context. Keep it that way.
+```
+
+The `Gotcha` and `Risk` lines carry the most weight, because they are the two things a reader
+cannot work out from the graph in under ten minutes. `Entry` is next: knowing what fires a
+Blueprint is most of knowing what it is for.
+
+Keep entries short enough that the file stays readable at fifty Blueprints. If an entry wants
+to become a paragraph, the Blueprint probably wants to become two Blueprints.
+
+## 6. What not to write
 
 - Node-by-node narration in the handoff text. If it approaches one line per node, the graph is
   under-named; fix the naming instead.
 - Handoff text restating node names.
 - Aspirational text describing what the graph should do rather than what it does.
-- Changelog prose in the handoff block. History belongs in source control and the ledger.
-- A ledger entry for a read-only session. Nothing changed; there is nothing to record.
+- Changelog prose in the map. The map is present tense: what is there now. History lives in
+  `agent-log.md` and in source control.
+- An `agent-log.md` entry for a read-only session. Nothing changed; there is nothing to record.
 - A claim that the graph is commented. It is not, and it cannot be.
