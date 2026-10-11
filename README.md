@@ -14,8 +14,9 @@ This skill sets rules the agent follows before it touches the editor:
 - Extract to a function on the third repeat of a block.
 - Stop and refactor above roughly 30 nodes in one graph.
 - Delete anything left disconnected.
-- Write a graph header comment, a description on every function, and a dated entry in the
-  repo saying what changed, why, and what is still open.
+- Document where MCP actually can: names, asset descriptions, and a dated entry in the repo
+  saying what changed, why, and what is still open. MCP cannot place comment boxes in a graph,
+  so the skill hands you that text to paste instead of pretending the graph is commented.
 
 Built for the official Unreal MCP in UE 5.8 (ModelContextProtocol plugin, port 8000, the
 `list_toolsets` / `describe_toolset` / `call_tool` meta-tools). If you run one of the

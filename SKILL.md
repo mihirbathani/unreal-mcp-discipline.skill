@@ -14,6 +14,12 @@ what is load-bearing, and rewrites it. The MCP session was then a net loss.
 Treat every node as something a human will have to read on a 1080p monitor at 11pm before a
 show. That is the standard.
 
+## Session scope
+
+This loads once and applies for the rest of the session. It does not need re-invoking per
+message, and the rules do not need restating in chat. Follow them quietly. The user sees the
+result in the plan, the graph, and the closing report, not in a recital of the policy.
+
 ## The loop
 
 **1. Read before writing.** No node is created before the current state is known.
@@ -42,9 +48,8 @@ failure - re-read state before retrying.
 result, and fix errors before adding more. Do not stack three unverified units and compile
 once at the end; the error list is then unattributable.
 
-**5. Document as you build, not as a final pass.** See `references/documentation.md`. The
-comment header, the function description, and the ledger entry are part of the deliverable,
-not decoration.
+**5. Document as you build, not as a final pass.** See `references/documentation.md`. Names,
+the ledger entry, and the handoff comment text are part of the deliverable, not decoration.
 
 **6. Audit before declaring done.** Run the checklist below and report it. If something
 fails, fix it and re-report rather than noting it as a caveat.
@@ -74,16 +79,26 @@ casting, repeated logic, or per-frame work.
 
 ## Documentation contract
 
-Minimum for any graph this session touches:
+**MCP cannot place comment boxes in a Blueprint graph.** Do not plan around adding them, do
+not claim to have added them, and do not report a graph as documented because the plan said
+comments. Confirm it against the installed build if the toolset ever gains the capability; the
+build is the authority, not this file.
 
-- A comment box at the graph origin: purpose, when it runs, what it reads and writes, side
-  effects, and the fact that an agent last edited it with the date.
-- Comment boxes around each logical block. Comment the *why*, never restate the node name.
-- A Description on every function and macro created - that is the hover tooltip other graphs
-  and other agents see.
-- Category and tooltip on every variable created, especially instance-editable ones.
-- A ledger entry in the project's agent notes file recording asset path, what changed, why,
-  and anything left open.
+That removes the usual home for documentation, so it goes in four other places:
+
+- **Names, which are the only documentation that stays attached to the graph.** Name by intent:
+  `CanFireWeapon`, not `CheckBool2`. A function whose name needs "And" in it is doing two
+  things. With comment boxes unavailable, a vague name is not a style nit, it is the whole
+  documentation failure.
+- **Descriptions, Categories and tooltips, where the toolset exposes them.** A function
+  Description is the hover tooltip everywhere that function is called. A variable Category is
+  what makes a 40-variable Blueprint navigable. Check `describe_toolset` before promising
+  either, and say in the closing report which ones could not be set.
+- **The ledger**, a dated entry in the project's agent notes: asset path, what changed, why,
+  what was reused, and what is still open. This is the part that survives the session.
+- **Handoff comment text.** Write the graph header and block comments as plain text in the
+  closing report, ready to paste. Thirty seconds of the user's time in the editor beats an
+  undocumented graph, and they can decline.
 
 Format and templates in `references/documentation.md`. The ledger is the part agents skip and
 the part that matters most for the next session - including your own next session, which
@@ -103,7 +118,13 @@ Push back instead of building:
 - **Serial only.** Tool calls execute on the game thread. Parallel calls into the editor
   deadlock it. One call at a time, always.
 - **Save before and after** any bulk change.
-- **Arrange nodes** after building. An unarranged graph is an undocumented graph.
+- **One undo transaction per logical unit.** Where the scripting layer allows it
+  (`unreal.ScopedEditorTransaction` in Python), wrap a batch so a single Ctrl+Z reverses the
+  whole function, not forty separate node creations. This is the cheapest safety net the user
+  has against an agent-built graph they dislike.
+- **Set node positions as you create them.** Do not assume an auto-arrange tool exists. Lay
+  out left to right with no overlaps; a pile of nodes at the origin is unreadable, and with no
+  comment boxes available, layout is doing more work than usual.
 - **Verify with a read**, not an assumption. Re-read the graph, or take a viewport or graph
   screenshot, before saying it works.
 - **Arbitrary Python execution inside the editor is privileged.** It can move, mutate, or
@@ -122,13 +143,53 @@ Assets touched:   /Game/... (created | modified)
 Graphs:           <graph name> - <N> nodes, <M> functions extracted
 Reused:           <existing functions/interfaces called instead of rebuilt>
 Compile:          clean | <errors and what was done>
-Docs:             header + block comments + descriptions | ledger updated at <path>
+Docs:             descriptions set | <what the toolset refused> | ledger at <path>
 Orphans removed:  <N>
 Not built:        <things suggested but deliberately left out>
 ```
 
 `Not built` is not padding. It is how the next person knows a gap was a decision rather than
 an oversight.
+
+Then, below the report, the comment text that could not be placed:
+
+```
+To paste in the editor (MCP cannot add comment boxes):
+
+[BP_Scoreboard :: UpdateScore]   <- graph header, top-left of the graph
+Purpose : ...
+Runs on : ...
+Gotcha  : ...
+
+Around nodes 4-9:  "Debounce - overlay refreshes at 30Hz max"
+```
+
+Skip the block entirely when nothing needs pasting. Do not pad it to look thorough.
+
+## Questions worth asking
+
+Ask only where the answer changes what gets built, and ask in the plan message rather than
+drip-feeding questions mid-build. One or two, then build. If the project already answers it,
+answer it from the project and state the assumption instead of asking.
+
+Worth asking:
+
+- Is this shipping or on air this week? It decides whether touching existing logic is
+  acceptable at all.
+- Does this belong in this Blueprint or in a shared library? Discovering a second caller later
+  is a rewrite; the question costs one line.
+- Who tunes these numbers, you or a designer? It decides literal against variable against Data
+  Asset.
+- Is there an existing system for this? Project convention beats anything invented here.
+- Do you want this fast, or do you want to hand it to someone else later? Both are legitimate,
+  but it is the user's call, not an assumption.
+
+Not worth asking:
+
+- Anything `describe_toolset` or a read call would answer.
+- Permission to follow the rules in this skill.
+- Confirmation at each step of a plan already agreed. Agreement on the plan is agreement to
+  build it.
 
 ## Auditing someone else's graph
 

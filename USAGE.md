@@ -1,7 +1,8 @@
 # Usage
 
 There is nothing to invoke and no syntax to learn. The skill declares when it applies, and
-Claude loads it as soon as a task touches Unreal.
+Claude loads it as soon as a task touches Unreal. It loads once and stays active for the rest
+of the session, so there is no need to name it again on every message.
 
 ## 1. Ask for the work
 
@@ -29,8 +30,10 @@ first.
    roughly 30 nodes it splits the plan into functions on paper, which costs a paragraph
    instead of twenty tool calls.
 3. It batches. One script execution per logical unit, not fifty add-node round trips.
-4. It documents while building: graph header comment, block comments, a Description on every
-   function, and a dated ledger entry in your repo.
+4. It documents where MCP can. Names first, since they are the only thing that stays attached
+   to the graph, then asset Descriptions and Categories if the toolset exposes them, then a
+   dated ledger entry in your repo. MCP cannot place comment boxes in a graph, so the header
+   and block comment text comes back in the report for you to paste, or ignore.
 
 ## 3. Read the plan before saying go
 
@@ -50,7 +53,7 @@ Assets touched:   /Game/... (created | modified)
 Graphs:           <graph name> - <N> nodes, <M> functions extracted
 Reused:           <existing functions/interfaces called instead of rebuilt>
 Compile:          clean | <errors and what was done>
-Docs:             header + block comments + descriptions | ledger updated at <path>
+Docs:             descriptions set | <what the toolset refused> | ledger at <path>
 Orphans removed:  <N>
 Not built:        <things suggested but deliberately left out>
 ```

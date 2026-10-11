@@ -145,8 +145,17 @@ Ask Claude:
 
 The skill governs how Claude behaves. It does not connect anything. Your MCP server does that.
 
-1. In Unreal Engine 5.8, open Edit, then Plugins. Search for ModelContextProtocol, enable it,
-   and restart the editor.
+1. In Unreal Engine 5.8, open Edit, then Plugins, and enable all three of these. One on its
+   own is not enough: the first is the server, the second handles discovery and schemas, and
+   the third is what actually registers the operations.
+
+   ```
+   ModelContextProtocol
+   ToolsetRegistry
+   AllToolsets
+   ```
+
+   Restart the editor.
 
 2. Start the server from the editor console:
 
@@ -156,10 +165,12 @@ The skill governs how Claude behaves. It does not connect anything. Your MCP ser
 
    Or configure auto-start in project settings.
 
-3. Point your MCP client at `http://127.0.0.1:8000/mcp`.
+3. Point your MCP client at `http://127.0.0.1:8000/mcp`. To have Unreal write the config block
+   for you, run `ModelContextProtocol.GenerateClientConfig` with your client's name.
 
 4. Confirm the connection by asking Claude to list toolsets. It should call `list_toolsets` and
-   come back with actors, blueprints, materials, and the rest.
+   come back with actors, blueprints, materials, and the rest. If a toolset you enabled is
+   missing, run `ModelContextProtocol.RefreshTools` rather than restarting the editor.
 
 If the server is unreachable and you get connection refused on 127.0.0.1:8000, check in this
 order: the editor is running, the plugin is enabled, the server was actually started, and

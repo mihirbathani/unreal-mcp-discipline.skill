@@ -15,6 +15,20 @@ MCP client  ->  http://127.0.0.1:8000/mcp
                   AllToolsets / toolsets (actors, blueprints, materials, ...)
 ```
 
+Three plugins, not one: `ModelContextProtocol`, `ToolsetRegistry` and `AllToolsets`. Enabling
+only the first gives a server with nothing useful registered on it.
+
+Useful console commands:
+
+```
+ModelContextProtocol.StartServer
+ModelContextProtocol.RefreshTools              re-register after enabling a toolset
+ModelContextProtocol.GenerateClientConfig <client>   writes a client config block
+```
+
+`RefreshTools` is the fix for a toolset that was enabled after the server started and is not
+showing up. Restarting the editor for that is wasted time.
+
 The server has no authentication layer and binds to loopback. Any process running as the same
 user can talk to it. Do not expose the port; do not run it on a shared machine.
 
@@ -58,10 +72,26 @@ execution once the plan is settled. Rules:
 - **Return something checkable.** Have the script report what it created so the result can be
   verified without a second read pass.
 
+Wrap each batch in a single undo transaction where the scripting layer allows it. In Python
+that is `unreal.ScopedEditorTransaction`. One Ctrl+Z should then reverse one function's worth
+of work rather than leaving the user to undo forty node creations one at a time. This is the
+cheapest protection available against a graph the user does not want.
+
 Arbitrary Python execution inside the editor is privileged: full access to toolset APIs, the
 asset database, the project on disk, and editor-privileged functions. It will succeed without
 a second confirmation when approvals are off. Use it to batch known-good operations. Do not
 use it to explore, and do not use it for anything destructive without asking first.
+
+## Known limits
+
+- **Comment boxes cannot be created.** No toolset places a comment node in a Blueprint graph,
+  and Blueprint graph editing is barely exposed to Python, so there is no scripting fallback
+  either. Plan documentation around names, asset metadata and the ledger. See
+  `documentation.md`.
+- **Do not assume an auto-arrange tool.** Set node positions explicitly as you create them.
+- **Verify capability per build.** This plugin is experimental in 5.8 and Epic has said APIs
+  and data formats may change. `describe_toolset` is the authority on what exists today. Tool
+  counts reported by third parties vary widely, so they say nothing about your install.
 
 ## Timeouts and retries
 
@@ -95,8 +125,9 @@ creation call.
 - Delete abandoned intermediate assets - the test Blueprint created to check something, the
   duplicate that a retry produced.
 - Arrange nodes so the graph reads left to right without overlaps.
-- Remove debug print nodes unless the user asked for them, in which case put them in a clearly
-  marked debug comment box.
+- Remove debug print nodes unless the user asked for them. If they stay, name them so they are
+  greppable and list them in the closing report, since there is no comment box to mark them
+  with.
 
 ## If the server is not reachable
 
